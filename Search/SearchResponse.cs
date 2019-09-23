@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Theory.Infos;
 
 namespace Theory.Search
@@ -44,5 +45,11 @@ namespace Theory.Search
             Tracks = new[] {track};
             return this;
         }
+
+        /// <inheritdoc />
+        public override string ToString()
+            => $"Searched for: {Query}\nStatus: {Status}" +
+               $"\nPlaylist? {(Playlist.Equals(default(PlaylistInfo)) ? "NULL" : Playlist.Name)}" +
+               $"\nTracks: {Tracks?.Count()}";
     }
 }

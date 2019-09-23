@@ -106,7 +106,7 @@ namespace Theory.Providers.SoundCloud
                 .ConfigureAwait(false);
 
             if (bytes.IsEmpty)
-                return default;
+                throw new Exception("Failed to fetch stream.");
 
             var read = JsonSerializer.Deserialize<SoundCloudDirectUrl>(bytes.Span);
             var stream = await _restClient

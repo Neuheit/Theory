@@ -51,7 +51,7 @@ namespace Theory
                 .ConfigureAwait(false);
 
             if (!get.IsSuccessStatusCode)
-                throw new HttpRequestException();
+                throw new HttpRequestException(get.ReasonPhrase);
 
             using var content = get.Content;
             var array = await content.ReadAsByteArrayAsync()
@@ -72,7 +72,7 @@ namespace Theory
                 .ConfigureAwait(false);
 
             if (!get.IsSuccessStatusCode)
-                throw new HttpRequestException();
+                throw new HttpRequestException(get.ReasonPhrase);
 
             using var content = get.Content;
             var stream = await content.ReadAsStreamAsync()
@@ -93,7 +93,7 @@ namespace Theory
                 .ConfigureAwait(false);
 
             if (!get.IsSuccessStatusCode)
-                throw new HttpRequestException();
+                throw new HttpRequestException(get.ReasonPhrase);
 
             using var content = get.Content;
             var str = await content.ReadAsStringAsync()
