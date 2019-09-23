@@ -5,7 +5,7 @@ using Theory.Search;
 
 namespace Theory.Interfaces
 {
-    public interface IAudioSource
+    public interface IAudioProvider
     {
         ValueTask<SearchResponse> SearchAsync(string query);
 

@@ -11,7 +11,7 @@ using Theory.Search;
 
 namespace Theory.Providers.SoundCloud
 {
-    public readonly struct SoundCloudSource : IAudioSource
+    public readonly struct SoundCloudProvider : IAudioProvider
     {
         private const string
             BASE_URL = "https://api.soundcloud.com",
@@ -19,7 +19,7 @@ namespace Theory.Providers.SoundCloud
 
         private readonly RestClient _restClient;
 
-        public SoundCloudSource(RestClient restClient)
+        public SoundCloudProvider(RestClient restClient)
             => _restClient = restClient;
 
         /// <inheritdoc />

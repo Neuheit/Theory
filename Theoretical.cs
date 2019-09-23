@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Net;
 using Theory.Interfaces;
 using Theory.Providers;
+using Theory.Providers.BandCamp;
 using Theory.Providers.SoundCloud;
 using Theory.Providers.YouTube;
 
@@ -9,7 +10,7 @@ namespace Theory
 {
     public readonly struct Theoretical
     {
-        private readonly IDictionary<ProviderType, IAudioSource> _audioSources;
+        private readonly IDictionary<ProviderType, IAudioProvider> _audioSources;
 
         public readonly int Sources
             => _audioSources.Count;
@@ -17,14 +18,15 @@ namespace Theory
         public Theoretical(IWebProxy proxy)
         {
             var restClient = new RestClient(proxy);
-            _audioSources = new Dictionary<ProviderType, IAudioSource>
+            _audioSources = new Dictionary<ProviderType, IAudioProvider>
             {
-                {ProviderType.YouTube, new YouTubeSource()},
-                {ProviderType.SoundCloud, new SoundCloudSource(restClient)}
+                {ProviderType.YouTube, new YouTubeProvider(restClient)},
+                {ProviderType.SoundCloud, new SoundCloudProvider(restClient)},
+                {ProviderType.BandCamp, new BandCampProvider(restClient)}
             };
         }
 
-        public IAudioSource GetSource(ProviderType providerType)
+        public IAudioProvider GetSource(ProviderType providerType)
             => _audioSources[providerType];
     }
 }

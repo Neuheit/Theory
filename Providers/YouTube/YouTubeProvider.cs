@@ -12,13 +12,13 @@ using Theory.Search;
 
 namespace Theory.Providers.YouTube
 {
-    public readonly struct YouTubeSource : IAudioSource
+    public readonly struct YouTubeProvider : IAudioProvider
     {
         private const string BASE_URL = "https://www.youtube.com";
         private readonly Regex _idRegex;
         private readonly RestClient _restClient;
 
-        public YouTubeSource(RestClient restClient)
+        public YouTubeProvider(RestClient restClient)
         {
             _restClient = restClient;
             _idRegex = new Regex("(?!videoseries)[a-zA-Z0-9_-]{11,42}",
