@@ -23,7 +23,7 @@ namespace Theory.Providers.SoundCloud
             => _restClient = restClient;
 
         /// <inheritdoc />
-        public async ValueTask<SearchResponse> SearchAsync(string query)
+        public readonly async ValueTask<SearchResponse> SearchAsync(string query)
         {
             var response = SearchResponse.Create(query);
             var url = string.Empty;
@@ -94,7 +94,7 @@ namespace Theory.Providers.SoundCloud
         }
 
         /// <inheritdoc />
-        public async ValueTask<Stream> GetStreamAsync(string trackId)
+        public readonly async ValueTask<Stream> GetStreamAsync(string trackId)
         {
             var bytes = await _restClient
                 .WithUrl(BASE_URL)
@@ -118,7 +118,7 @@ namespace Theory.Providers.SoundCloud
         }
 
         /// <inheritdoc />
-        public ValueTask<Stream> GetStreamAsync(TrackInfo track)
+        public readonly ValueTask<Stream> GetStreamAsync(TrackInfo track)
             => GetStreamAsync(track.Id);
     }
 }
