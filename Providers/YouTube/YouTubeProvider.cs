@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Theory.Infos;
 using Theory.Interfaces;
@@ -15,22 +14,17 @@ namespace Theory.Providers.YouTube
     public readonly struct YouTubeProvider : IAudioProvider
     {
         private const string BASE_URL = "https://www.youtube.com";
-        private readonly Regex _idRegex;
         private readonly RestClient _restClient;
 
         public YouTubeProvider(RestClient restClient)
-        {
-            _restClient = restClient;
-            _idRegex = new Regex("(?!videoseries)[a-zA-Z0-9_-]{11,42}",
-                RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        }
+            => _restClient = restClient;
 
         /// <inheritdoc />
         public readonly async ValueTask<SearchResponse> SearchAsync(string query)
         {
             var response = SearchResponse.Create(query);
             string url;
-            ParseId(query, out var videoId, out var playlistId);
+            YouTubeParser.ParseId(query, out var videoId, out var playlistId);
 
             switch (Uri.IsWellFormedUriString(query, UriKind.Absolute))
             {
@@ -99,30 +93,23 @@ namespace Theory.Providers.YouTube
 
         /// <inheritdoc />
         public readonly async ValueTask<Stream> GetStreamAsync(string trackId)
-            => null;
+        {
+            var vidInfo = await _restClient
+                .WithUrl(BASE_URL)
+                .WithPath("get_video_info")
+                .WithParameter("video_id", trackId)
+                .GetBytesAsync()
+                .ConfigureAwait(false);
+
+
+            if (vidInfo.IsEmpty)
+                throw new Exception("Provider didn't return any stream information.'");
+            
+            return default;
+        }
 
         /// <inheritdoc />
         public readonly ValueTask<Stream> GetStreamAsync(TrackInfo track)
             => GetStreamAsync(track.Id);
-
-        private readonly void ParseId(string url, out string videoId, out string playlistId)
-        {
-            var matches = _idRegex.Matches(url);
-            var (vidId, plyId) = ("", "");
-
-            foreach (Match match in matches)
-            {
-                if (!match.Success)
-                    continue;
-
-                if (match.Length == 11)
-                    vidId = match.Value;
-                else
-                    plyId = match.Value;
-            }
-
-            videoId = vidId;
-            playlistId = plyId;
-        }
     }
 }

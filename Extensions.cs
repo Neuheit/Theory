@@ -1,3 +1,6 @@
+using System;
+using System.Runtime.InteropServices;
+
 namespace Theory
 {
     public static class Extensions
@@ -9,5 +12,12 @@ namespace Theory
             => str.Contains("?")
                 ? str + $"&{key}={value}"
                 : str + $"?{key}={value}";
+
+        public static ReadOnlySpan<byte> ToBytes(this ReadOnlySpan<char> str)
+            => MemoryMarshal.Cast<char, Byte>(str);
+
+        public static bool Equals(ReadOnlySpan<char> str, ReadOnlySpan<byte> bytes)
+            => ToBytes(str)
+                .SequenceEqual(bytes);
     }
 }
