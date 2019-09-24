@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Theory.Infos;
@@ -18,21 +17,19 @@ namespace Theory.Providers.SoundCloud
 
         private readonly RestClient _restClient;
 
-        private readonly SoundCloudIdHelper _id;
-
         public SoundCloudProvider(RestClient restClient)
-        {
-            _restClient = restClient;
-            _id = new SoundCloudIdHelper(default);
-        }
+            => _restClient = restClient;
 
         /// <inheritdoc />
         public readonly async ValueTask<SearchResponse> SearchAsync(string query)
         {
             var response = SearchResponse.Create(query);
             var url = string.Empty;
-            var id = await _id.GetIdAsync().ConfigureAwait(false);
 
+            await SoundCloudHelper.ValidateClientIdAsync(_restClient)
+                .ConfigureAwait(false);
+
+            var id = SoundCloudHelper.ClientId;
             switch (query)
             {
                 case var q when Uri.IsWellFormedUriString(query, UriKind.Absolute):
@@ -41,7 +38,7 @@ namespace Theory.Providers.SoundCloud
                         url = BASE_URL
                             .WithPath("resolve")
                             .WithParameter("url", query)
-                            .WithParameter("client_id", id);
+                            .WithParameter("client_id", SoundCloudHelper.ClientId);
 
                         response.WithStatus(SearchStatus.TrackLoaded);
                     }
@@ -50,7 +47,7 @@ namespace Theory.Providers.SoundCloud
                         url = BASE_URL
                             .WithPath("resolve")
                             .WithParameter("url", query)
-                            .WithParameter("client_id", id);
+                            .WithParameter("client_id", SoundCloudHelper.ClientId);
 
                         response.WithStatus(SearchStatus.PlaylistLoaded);
                     }
@@ -61,7 +58,7 @@ namespace Theory.Providers.SoundCloud
                     url = BASE_URL
                         .WithPath("tracks")
                         .WithParameter("q", query)
-                        .WithParameter("client_id", id);
+                        .WithParameter("client_id", SoundCloudHelper.ClientId);
 
                     response.WithStatus(SearchStatus.SearchResult);
                     break;
@@ -101,12 +98,15 @@ namespace Theory.Providers.SoundCloud
         /// <inheritdoc />
         public readonly async ValueTask<Stream> GetStreamAsync(string trackId)
         {
+            await SoundCloudHelper.ValidateClientIdAsync(_restClient)
+                .ConfigureAwait(false);
+
             var bytes = await _restClient
                 .WithUrl(BASE_URL)
                 .WithPath("tracks")
                 .WithPath(trackId)
                 .WithPath("stream")
-                .WithParameter("client_id", await _id.GetIdAsync().ConfigureAwait(false))
+                .WithParameter("client_id", SoundCloudHelper.ClientId)
                 .GetBytesAsync()
                 .ConfigureAwait(false);
 
