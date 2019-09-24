@@ -101,22 +101,12 @@ namespace Theory.Providers.SoundCloud
             await SoundCloudHelper.ValidateClientIdAsync(_restClient)
                 .ConfigureAwait(false);
 
-            var bytes = await _restClient
+            var stream = await _restClient
                 .WithUrl(BASE_URL)
                 .WithPath("tracks")
                 .WithPath(trackId)
                 .WithPath("stream")
                 .WithParameter("client_id", SoundCloudHelper.ClientId)
-                .WithHeader("Accept", "application/json")
-                .GetBytesAsync()
-                .ConfigureAwait(false);
-
-            if (bytes.IsEmpty)
-                throw new Exception("Failed to fetch stream.");
-
-            var read = JsonSerializer.Deserialize<SoundCloudDirectUrl>(bytes.Span);
-            var stream = await _restClient
-                .WithUrl(read.Url)
                 .GetStreamAsync()
                 .ConfigureAwait(false);
 
