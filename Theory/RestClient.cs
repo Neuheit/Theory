@@ -17,7 +17,6 @@ namespace Theory
             _client = new HttpClient(new HttpClientHandler
             {
                 Proxy = proxy,
-                UseCookies = false,
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             });
         }
@@ -40,6 +39,15 @@ namespace Theory
             return this;
         }
 
+        public RestClient WithHeader(string key, string value)
+        {
+            if (_client.DefaultRequestHeaders.Contains(key))
+                return this;
+
+            _client.DefaultRequestHeaders.Add(key, value);
+            return this;
+        }
+
         public async ValueTask<ReadOnlyMemory<byte>> GetBytesAsync(string url = default)
         {
             url ??= _url;
@@ -58,6 +66,7 @@ namespace Theory
                 .ConfigureAwait(false);
 
             _url = string.Empty;
+            _client.DefaultRequestHeaders.Clear();
             return array;
         }
 
@@ -79,7 +88,13 @@ namespace Theory
                 .ConfigureAwait(false);
 
             _url = string.Empty;
-            return stream;
+            _client.DefaultRequestHeaders.Clear();
+
+            var ms = new MemoryStream((int) stream.Length);
+            await stream.CopyToAsync(ms)
+                .ConfigureAwait(false);
+
+            return ms;
         }
 
         public async ValueTask<string> GetStringAsync(string url = default)
@@ -100,6 +115,8 @@ namespace Theory
                 .ConfigureAwait(false);
 
             _url = string.Empty;
+            _client.DefaultRequestHeaders.Clear();
+
             return str;
         }
     }
