@@ -87,12 +87,12 @@ namespace Theory
             var stream = await content.ReadAsStreamAsync()
                 .ConfigureAwait(false);
 
-            _url = string.Empty;
-            _client.DefaultRequestHeaders.Clear();
-
             var ms = new MemoryStream((int) stream.Length);
             await stream.CopyToAsync(ms)
                 .ConfigureAwait(false);
+
+            _url = string.Empty;
+            _client.DefaultRequestHeaders.Clear();
 
             return ms;
         }

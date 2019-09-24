@@ -107,6 +107,7 @@ namespace Theory.Providers.SoundCloud
                 .WithPath(trackId)
                 .WithPath("stream")
                 .WithParameter("client_id", SoundCloudHelper.ClientId)
+                .WithHeader("Accept", "application/json")
                 .GetBytesAsync()
                 .ConfigureAwait(false);
 
