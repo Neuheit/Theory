@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Theory.Providers.BandCamp.Entities
 {
-    public struct BandCampCurrent
+    internal struct BandCampCurrent
     {
         [JsonPropertyName("title")]
         public string Title { get; set; }

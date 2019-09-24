@@ -40,7 +40,7 @@ namespace Theory.Providers.BandCamp
                 $"https://bandcamp.com/search?q={WebUtility.UrlEncode(query)}"
             };
 
-            var json = await ScrapeJsonAsync(query)
+            var json = await BandCampParser.ScrapeJsonAsync(_restClient, query)
                 .ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(json))
@@ -84,10 +84,10 @@ namespace Theory.Providers.BandCamp
             if (!_trackUrlRegex.IsMatch(trackId))
                 return default;
 
-            var json = await ScrapeJsonAsync(trackId)
+            var json = await BandCampParser.ScrapeJsonAsync(_restClient, trackId)
                 .ConfigureAwait(false);
-            var bcResult = JsonSerializer.Deserialize<BandCampResult>(json);
 
+            var bcResult = JsonSerializer.Deserialize<BandCampResult>(json);
             var track = bcResult.TrackInfo.FirstOrDefault();
 
             if (track.Equals(default(BandCampTrack)))
@@ -103,40 +103,5 @@ namespace Theory.Providers.BandCamp
         /// <inheritdoc />
         public readonly ValueTask<Stream> GetStreamAsync(TrackInfo track)
             => GetStreamAsync(track.Id);
-
-        private readonly async ValueTask<string> ScrapeJsonAsync(string url)
-        {
-            var rawHtml = await _restClient
-                .GetStringAsync(url)
-                .ConfigureAwait(false);
-
-            if (string.IsNullOrWhiteSpace(rawHtml))
-                return string.Empty;
-
-            const string startStr = "var TralbumData = {",
-                         endStr = "};";
-
-            if (rawHtml.IndexOf(startStr, StringComparison.Ordinal) == -1)
-                return string.Empty;
-
-            var tempData = rawHtml.Substring(rawHtml.IndexOf(startStr, StringComparison.Ordinal) + startStr.Length - 1);
-            tempData = tempData.Substring(0, tempData.IndexOf(endStr, StringComparison.Ordinal) + 1);
-
-            var jsonReg = new Regex(@"([a-zA-Z0-9_]*:\s)(?!\s)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            var commentReg = new Regex(@"\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*",
-                RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-            tempData = commentReg.Replace(tempData, "");
-            var matches = jsonReg.Matches(tempData);
-            foreach (Match match in matches)
-            {
-                var val = $"\"{match.Value.Replace(": ", "")}\":";
-                var regex = new Regex(Regex.Escape(match.Value), RegexOptions.Compiled | RegexOptions.IgnoreCase);
-                tempData = regex.Replace(tempData, val, 1);
-            }
-
-            tempData = tempData.Replace("\" + \"", "");
-            return tempData;
-        }
     }
 }

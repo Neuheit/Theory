@@ -7,7 +7,7 @@ using Theory.Search;
 namespace Theory.Tests
 {
     [TestClass]
-    public sealed class SoundCloudTests
+    public sealed class SoundCloudTests : IProviderTest
     {
         private readonly RestClient _restClient
             = new RestClient(default);
@@ -15,69 +15,66 @@ namespace Theory.Tests
         private SoundCloudProvider CloudProvider
             => new SoundCloudProvider(_restClient);
 
+        [DataTestMethod]
+        [DataRow("Travis Scott Through The Late Night")]
+        [DataRow("Daniel Ceaser Get You")]
+        [DataRow("The Weeknd Call Out My Name")]
+        public async Task PerformSearchAsync(string query)
+        {
+            var response = await CloudProvider.SearchAsync(query)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(SearchStatus.SearchResult, response.Status);
+            Assert.IsNotNull(response.Tracks);
+            Assert.IsTrue(response.Tracks.Count > 0);
+            Assert.IsNull(response.Playlist.Name);
+        }
+
+        [DataTestMethod]
+        [DataRow("https://soundcloud.com/kanyewest/sets/ye-49")]
+        [DataRow("https://soundcloud.com/albsoon/sets/the-weeknd-more-balloons-remixed-by-sango")]
+        [DataRow("https://soundcloud.com/travisscott-2/sets/astroworld")]
+        public async Task GetPlaylistAsync(string playlistLink)
+        {
+            var response = await CloudProvider.SearchAsync(playlistLink)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(SearchStatus.PlaylistLoaded, response.Status);
+            Assert.IsNotNull(response.Playlist);
+            Assert.IsNotNull(response.Playlist.Name);
+            Assert.IsTrue(response.Tracks.Count > 0);
+        }
+
+        [DataTestMethod]
+        [DataRow("https://soundcloud.com/theweeknd/hurt-you")]
+        [DataRow("https://soundcloud.com/gesaffelstein/lost-in-the-fire")]
+        [DataRow("https://soundcloud.com/kanyewest/i-love-it-freaky-girl-edit")]
+        public async Task GetTrackAsync(string trackLink)
+        {
+            var response = await CloudProvider.SearchAsync(trackLink)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(SearchStatus.TrackLoaded, response.Status);
+            Assert.IsTrue(response.Tracks.Count == 1);
+        }
+
         [TestMethod]
         public async Task FetchIdTestAsync()
         {
-            for (var i = 0; i < 5; i++)
-            {
-                await SoundCloudHelper.ValidateClientIdAsync(_restClient)
-                    .ConfigureAwait(false);
-
-                Assert.IsNotNull(SoundCloudHelper.ClientId);
-            }
-        }
-
-        [TestMethod]
-        public async Task SearchAsync()
-        {
-            var search = await CloudProvider.SearchAsync("The Weeknd Valerie")
+            await SoundCloudHelper.ValidateClientIdAsync(_restClient)
                 .ConfigureAwait(false);
 
-            Assert.AreEqual(search.Status, SearchStatus.SearchResult);
-            Assert.IsNotNull(search.Tracks);
+            Assert.IsNotNull(SoundCloudHelper.ClientId);
         }
 
-        [TestMethod]
-        public async Task GetPlaylistAsync()
+        [DataTestMethod]
+        [DataRow("https://soundcloud.com/theweeknd/hurt-you")]
+        [DataRow("https://soundcloud.com/gesaffelstein/lost-in-the-fire")]
+        [DataRow("https://soundcloud.com/kanyewest/i-love-it-freaky-girl-edit")]
+        public async Task GetStreamAsync(string streamUrl)
         {
             var search = await CloudProvider
-                .SearchAsync("https://soundcloud.com/albsoon/sets/the-weeknd-more-balloons-remixed-by-sango")
-                .ConfigureAwait(false);
-
-            Assert.AreEqual(search.Status, SearchStatus.PlaylistLoaded);
-            Assert.IsNotNull(search.Tracks);
-            Assert.IsNotNull(search.Playlist);
-        }
-
-        [TestMethod]
-        public async Task GetNormalTrackAsync()
-        {
-            var search = await CloudProvider
-                .SearchAsync("https://soundcloud.com/albsoon/01-the-morning-sango-remix")
-                .ConfigureAwait(false);
-
-            Assert.AreEqual(search.Status, SearchStatus.TrackLoaded);
-            Assert.IsNotNull(search.Tracks);
-            Assert.IsNotNull(search.Playlist);
-        }
-
-        [TestMethod]
-        public async Task GetRestrictedTrackAsync()
-        {
-            var search = await CloudProvider
-                .SearchAsync("https://soundcloud.com/theweeknd/hurt-you")
-                .ConfigureAwait(false);
-
-            Assert.AreEqual(search.Status, SearchStatus.TrackLoaded);
-            Assert.IsNotNull(search.Tracks);
-            Assert.IsNotNull(search.Playlist);
-        }
-
-        [TestMethod]
-        public async Task GetStreamAsync()
-        {
-            var search = await CloudProvider
-                .SearchAsync("https://soundcloud.com/theweeknd/hurt-you")
+                .SearchAsync(streamUrl)
                 .ConfigureAwait(false);
 
             var track = search.Tracks.FirstOrDefault();

@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Theory.Providers.BandCamp.Entities
 {
-    public struct BandCampResult
+    internal struct BandCampResult
     {
         [JsonPropertyName("current")]
         public BandCampCurrent Current { get; set; }
