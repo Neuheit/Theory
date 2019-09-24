@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Theory.Providers.SoundCloud;
@@ -32,9 +33,8 @@ namespace Theory.Tests
             var search = await CloudProvider.SearchAsync("The Weeknd Valerie")
                 .ConfigureAwait(false);
 
-            Assert.Equals(search.Status, SearchStatus.SearchResult);
+            Assert.AreEqual(search.Status, SearchStatus.SearchResult);
             Assert.IsNotNull(search.Tracks);
-            Assert.IsNull(search.Playlist);
         }
 
         [TestMethod]
@@ -44,7 +44,7 @@ namespace Theory.Tests
                 .SearchAsync("https://soundcloud.com/albsoon/sets/the-weeknd-more-balloons-remixed-by-sango")
                 .ConfigureAwait(false);
 
-            Assert.Equals(search.Status, SearchStatus.PlaylistLoaded);
+            Assert.AreEqual(search.Status, SearchStatus.PlaylistLoaded);
             Assert.IsNotNull(search.Tracks);
             Assert.IsNotNull(search.Playlist);
         }
@@ -56,18 +56,19 @@ namespace Theory.Tests
                 .SearchAsync("https://soundcloud.com/albsoon/01-the-morning-sango-remix")
                 .ConfigureAwait(false);
 
-            Assert.Equals(search.Status, SearchStatus.TrackLoaded);
+            Assert.AreEqual(search.Status, SearchStatus.TrackLoaded);
             Assert.IsNotNull(search.Tracks);
             Assert.IsNotNull(search.Playlist);
         }
 
+        [TestMethod]
         public async Task GetRestrictedTrackAsync()
         {
             var search = await CloudProvider
                 .SearchAsync("https://soundcloud.com/theweeknd/hurt-you")
                 .ConfigureAwait(false);
 
-            Assert.Equals(search.Status, SearchStatus.TrackLoaded);
+            Assert.AreEqual(search.Status, SearchStatus.TrackLoaded);
             Assert.IsNotNull(search.Tracks);
             Assert.IsNotNull(search.Playlist);
         }
@@ -75,6 +76,18 @@ namespace Theory.Tests
         [TestMethod]
         public async Task GetStreamAsync()
         {
+            var search = await CloudProvider
+                .SearchAsync("https://soundcloud.com/theweeknd/hurt-you")
+                .ConfigureAwait(false);
+
+            var track = search.Tracks.FirstOrDefault();
+            Assert.IsNotNull(track);
+
+            var stream = await CloudProvider.GetStreamAsync(track)
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(stream);
+            Assert.IsFalse(stream.Length == 0);
         }
     }
 }
