@@ -80,15 +80,13 @@ namespace Theory.Providers.SoundCloud
                 case SearchStatus.PlaylistLoaded:
                     var scPly = JsonSerializer.Deserialize<SoundCloudPlaylist>(bytes.Span);
                     response.WithPlaylist(scPly.AsPlaylistInfo);
-                    response.WithTracks(scPly.Tracks.ToArray()
-                        .Select(x => x.AsTrackInfo));
+                    response.WithTracks(scPly.Tracks.Select(x => x.AsTrackInfo));
 
                     break;
 
                 case SearchStatus.SearchResult:
                     var scTracks = JsonSerializer.Deserialize<IEnumerable<SoundCloudTrack>>(bytes.Span);
-                    response.WithTracks(scTracks.ToArray()
-                        .Select(x => x.AsTrackInfo));
+                    response.WithTracks(scTracks.Select(x => x.AsTrackInfo));
                     break;
             }
 

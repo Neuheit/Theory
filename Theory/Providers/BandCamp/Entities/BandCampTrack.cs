@@ -4,7 +4,7 @@ using Theory.Infos;
 
 namespace Theory.Providers.BandCamp.Entities
 {
-    public struct BandCampTrack
+    internal struct BandCampTrack
     {
         [JsonPropertyName("streaming")]
         public int Streaming { get; set; }

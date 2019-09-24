@@ -20,8 +20,29 @@ namespace Theory.Tests
             var stream = await _restClient.GetStreamAsync("https://google.com")
                 .ConfigureAwait(false);
 
-            Assert.IsNotNull(stream, "stream != null");
-            Assert.IsNotNull(stream.Length, "stream.Length != null");
+            Assert.IsNotNull(stream);
+            Assert.IsNotNull(stream.Length);
+            Assert.IsFalse(stream.Length == 0);
+        }
+
+        [TestMethod]
+        public async Task GetBytesAsync()
+        {
+            var bytes = await _restClient.GetBytesAsync("https://google.com")
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(bytes);
+            Assert.IsFalse(bytes.IsEmpty);
+        }
+
+        [TestMethod]
+        public async Task GetStringAsync()
+        {
+            var rawString = await _restClient.GetStringAsync("https://google.com")
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(rawString);
+            Assert.IsFalse(rawString.Length == 0);
         }
     }
 }

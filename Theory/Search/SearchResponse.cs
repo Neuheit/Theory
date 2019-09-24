@@ -9,7 +9,7 @@ namespace Theory.Search
         public string Query { get; }
         public SearchStatus Status { get; private set; }
         public PlaylistInfo Playlist { get; private set; }
-        public IEnumerable<TrackInfo> Tracks { get; private set; }
+        public ICollection<TrackInfo> Tracks { get; private set; }
 
         private SearchResponse(string query)
         {
@@ -36,7 +36,7 @@ namespace Theory.Search
 
         public SearchResponse WithTracks(IEnumerable<TrackInfo> tracks)
         {
-            Tracks = tracks;
+            Tracks = tracks.ToArray();
             return this;
         }
 
