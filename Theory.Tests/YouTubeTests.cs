@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Theory.Providers.YouTube;
@@ -32,9 +33,9 @@ namespace Theory.Tests
         [DataTestMethod]
         [DataRow("https://www.youtube.com/playlist?list=PL8Go-YHXcY4bnSo0BDjYt9KuW9izuBD8U")]
         [DataRow("https://www.youtube.com/playlist?list=OLAK5uy_nrbHEhhkZIpj3-XdSQm75NdaqxRScGpQc&playnext=1&index=1")]
-        public async Task GetPlaylistAsync(string playlistLink)
+        public async Task GetPlaylistAsync(string playlistUrl)
         {
-            var response = await TubeProvider.SearchAsync(playlistLink)
+            var response = await TubeProvider.SearchAsync(playlistUrl)
                 .ConfigureAwait(false);
 
             Assert.AreEqual(SearchStatus.PlaylistLoaded, response.Status);
@@ -46,13 +47,21 @@ namespace Theory.Tests
         [DataTestMethod]
         [DataRow("https://www.youtube.com/watch?v=z7kYa5GQYKg")]
         [DataRow("https://youtu.be/h5zkDVhR2Vk")]
-        public async Task GetTrackAsync(string trackLink)
+        public async Task GetTrackAsync(string trackUrl)
         {
-            var response = await TubeProvider.SearchAsync(trackLink)
+            var response = await TubeProvider.SearchAsync(trackUrl)
                 .ConfigureAwait(false);
 
             Assert.AreEqual(SearchStatus.TrackLoaded, response.Status);
             Assert.IsTrue(response.Tracks.Count == 1);
+        }
+
+        [DataTestMethod]
+        [DataRow("https://www.youtube.com/watch?v=z7kYa5GQYKg")]
+        [DataRow("https://youtu.be/h5zkDVhR2Vk")]
+        public async Task GetStreamAsync(string trackUrl)
+        {
+            Assert.ThrowsException<NotImplementedException>(() => TubeProvider.GetStreamAsync(trackUrl));
         }
     }
 }

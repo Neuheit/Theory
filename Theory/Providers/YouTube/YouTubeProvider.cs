@@ -104,7 +104,7 @@ namespace Theory.Providers.YouTube
 
             if (vidInfo.IsEmpty)
                 throw new Exception("Provider didn't return any stream information.'");
-            
+
             return default;
         }
 

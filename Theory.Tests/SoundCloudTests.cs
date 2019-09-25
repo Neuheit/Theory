@@ -34,9 +34,9 @@ namespace Theory.Tests
         [DataRow("https://soundcloud.com/kanyewest/sets/ye-49")]
         [DataRow("https://soundcloud.com/albsoon/sets/the-weeknd-more-balloons-remixed-by-sango")]
         [DataRow("https://soundcloud.com/travisscott-2/sets/astroworld")]
-        public async Task GetPlaylistAsync(string playlistLink)
+        public async Task GetPlaylistAsync(string playlistUrl)
         {
-            var response = await CloudProvider.SearchAsync(playlistLink)
+            var response = await CloudProvider.SearchAsync(playlistUrl)
                 .ConfigureAwait(false);
 
             Assert.AreEqual(SearchStatus.PlaylistLoaded, response.Status);
@@ -49,9 +49,9 @@ namespace Theory.Tests
         [DataRow("https://soundcloud.com/theweeknd/hurt-you")]
         [DataRow("https://soundcloud.com/gesaffelstein/lost-in-the-fire")]
         [DataRow("https://soundcloud.com/kanyewest/i-love-it-freaky-girl-edit")]
-        public async Task GetTrackAsync(string trackLink)
+        public async Task GetTrackAsync(string trackUrl)
         {
-            var response = await CloudProvider.SearchAsync(trackLink)
+            var response = await CloudProvider.SearchAsync(trackUrl)
                 .ConfigureAwait(false);
 
             Assert.AreEqual(SearchStatus.TrackLoaded, response.Status);
