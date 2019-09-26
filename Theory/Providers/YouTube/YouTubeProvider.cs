@@ -99,10 +99,8 @@ namespace Theory.Providers.YouTube
         /// <inheritdoc />
         public readonly async ValueTask<Stream> GetStreamAsync(string trackId)
         {
-            var stream = new MemoryStream();
-            using var audioTrackStream = await YouTubeTrackLoader.LoadTrackAsync(trackId).ConfigureAwait(false);
-            await audioTrackStream.CopyToAsync(stream).ConfigureAwait(false);
-            return stream;
+            var audioTrackStream = await YouTubeTrackLoader.LoadTrackAsync(trackId).ConfigureAwait(false);
+            return audioTrackStream;
         }
 
         /// <inheritdoc />
