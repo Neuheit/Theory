@@ -77,24 +77,13 @@ namespace Theory
             if (string.IsNullOrWhiteSpace(url))
                 throw new ArgumentNullException(url);
 
-            using var get = await _client.GetAsync(url)
-                .ConfigureAwait(false);
-
-            if (!get.IsSuccessStatusCode)
-                throw new HttpRequestException(get.ReasonPhrase);
-
-            using var content = get.Content;
-            var stream = await content.ReadAsStreamAsync()
-                .ConfigureAwait(false);
-
-            var ms = new MemoryStream((int)stream.Length);
-            await stream.CopyToAsync(ms)
+            using var stream = await _client.GetStreamAsync(url)
                 .ConfigureAwait(false);
 
             _url = string.Empty;
             _client.DefaultRequestHeaders.Clear();
 
-            return ms;
+            return stream;
         }
 
         public async ValueTask<string> GetStringAsync(string url = default)
