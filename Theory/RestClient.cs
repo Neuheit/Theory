@@ -87,7 +87,7 @@ namespace Theory
             var stream = await content.ReadAsStreamAsync()
                 .ConfigureAwait(false);
 
-            var ms = new MemoryStream((int) stream.Length);
+            var ms = new MemoryStream((int)stream.Length);
             await stream.CopyToAsync(ms)
                 .ConfigureAwait(false);
 
@@ -118,6 +118,24 @@ namespace Theory
             _client.DefaultRequestHeaders.Clear();
 
             return str;
+        }
+
+        public async ValueTask<long?> GetContentLengthAsync(string url)
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Head, url);
+
+            using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead)
+                .ConfigureAwait(false);
+
+            var contentLength = response.Content.Headers.ContentLength;
+
+            return contentLength;
+        }
+
+        public async ValueTask<HttpResponseMessage> GetAsync(string url)
+        {
+            return await _client.GetAsync(url)
+                .ConfigureAwait(false);
         }
     }
 }

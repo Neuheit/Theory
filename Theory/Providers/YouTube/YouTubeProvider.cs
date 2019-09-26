@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Theory.Infos;
 using Theory.Interfaces;
@@ -14,10 +16,11 @@ namespace Theory.Providers.YouTube
     public readonly struct YouTubeProvider : IAudioProvider
     {
         private const string BASE_URL = "https://www.youtube.com";
+
         private readonly RestClient _restClient;
 
         public YouTubeProvider(RestClient restClient)
-            => _restClient = restClient;
+           => _restClient = restClient;
 
         /// <inheritdoc />
         public readonly async ValueTask<SearchResponse> SearchAsync(string query)
@@ -44,7 +47,8 @@ namespace Theory.Providers.YouTube
                         url = BASE_URL
                             .WithPath("search_ajax")
                             .WithParameter("style", "json")
-                            .WithParameter("search_query", WebUtility.UrlEncode(query));
+                            .WithParameter("search_query", WebUtility.UrlEncode(query))
+                            .WithParameter("hl", "en");
 
                         response.WithStatus(SearchStatus.TrackLoaded);
                     }
@@ -55,7 +59,8 @@ namespace Theory.Providers.YouTube
                     url = BASE_URL
                         .WithPath("search_ajax")
                         .WithParameter("style", "json")
-                        .WithParameter("search_query", WebUtility.UrlEncode(query));
+                        .WithParameter("search_query", WebUtility.UrlEncode(query))
+                        .WithParameter("hl", "en");
 
                     response.WithStatus(SearchStatus.SearchResult);
                     break;
@@ -94,18 +99,10 @@ namespace Theory.Providers.YouTube
         /// <inheritdoc />
         public readonly async ValueTask<Stream> GetStreamAsync(string trackId)
         {
-            var vidInfo = await _restClient
-                .WithUrl(BASE_URL)
-                .WithPath("get_video_info")
-                .WithParameter("video_id", trackId)
-                .GetBytesAsync()
-                .ConfigureAwait(false);
-
-
-            if (vidInfo.IsEmpty)
-                throw new Exception("Provider didn't return any stream information.'");
-            
-            return default;
+            var stream = new MemoryStream();
+            using var audioTrackStream = await YouTubeTrackLoader.LoadTrackAsync(trackId).ConfigureAwait(false);
+            await audioTrackStream.CopyToAsync(stream).ConfigureAwait(false);
+            return stream;
         }
 
         /// <inheritdoc />
