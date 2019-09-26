@@ -6,8 +6,10 @@ namespace Theory.Tests
     {
         Task PerformSearchAsync(string query);
 
-        Task GetPlaylistAsync(string playlistLink);
+        Task GetPlaylistAsync(string playlistUrl);
 
-        Task GetTrackAsync(string trackLink);
+        Task GetTrackAsync(string trackUrl);
+
+        Task GetStreamAsync(string trackUrl);
     }
 }
