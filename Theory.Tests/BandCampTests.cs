@@ -33,10 +33,10 @@ namespace Theory.Tests
         [DataRow("https://slimk4.bandcamp.com/album/astrochops")]
         [DataRow("https://pennypolice.bandcamp.com/album/be-lucky")]
         [DataRow("https://glennastro.bandcamp.com/album/naturals")]
-        public async Task GetPlaylistAsync(string playlistLink)
+        public async Task GetPlaylistAsync(string playlistUrl)
         {
             var response = await CampProvider
-                .SearchAsync(playlistLink)
+                .SearchAsync(playlistUrl)
                 .ConfigureAwait(false);
 
             Assert.AreEqual(SearchStatus.PlaylistLoaded, response.Status);
@@ -49,14 +49,29 @@ namespace Theory.Tests
         [DataRow("https://slimk4.bandcamp.com/track/sicko-mode-chopnotslop-remix")]
         [DataRow("https://ostgut.bandcamp.com/track/be-true-to-me")]
         [DataRow("https://sambarker.bandcamp.com/track/models-of-wellbeing")]
-        public async Task GetTrackAsync(string trackLink)
+        public async Task GetTrackAsync(string trackUrl)
         {
             var response = await CampProvider
-                .SearchAsync(trackLink)
+                .SearchAsync(trackUrl)
                 .ConfigureAwait(false);
 
             Assert.AreEqual(SearchStatus.TrackLoaded, response.Status);
             Assert.IsTrue(response.Tracks.Count == 1);
+        }
+
+        [DataTestMethod]
+        [DataRow("https://slimk4.bandcamp.com/track/sicko-mode-chopnotslop-remix")]
+        [DataRow("https://ostgut.bandcamp.com/track/be-true-to-me")]
+        [DataRow("https://sambarker.bandcamp.com/track/models-of-wellbeing")]
+        public async Task GetStreamAsync(string trackUrl)
+        {
+            var stream = await CampProvider.GetStreamAsync(trackUrl)
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(stream);
+            Assert.IsTrue(stream.Length > 0);
+            Assert.IsTrue(stream.CanRead);
+            Assert.IsTrue(stream.CanWrite);
         }
     }
 }
