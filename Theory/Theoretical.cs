@@ -12,7 +12,7 @@ namespace Theory
     {
         private readonly IDictionary<ProviderType, IAudioProvider> _audioSources;
 
-        public readonly int Sources
+        public int Sources
             => _audioSources.Count;
 
         public Theoretical(IWebProxy proxy)
