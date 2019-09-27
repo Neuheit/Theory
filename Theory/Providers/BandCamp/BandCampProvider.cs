@@ -46,13 +46,12 @@ namespace Theory.Providers.BandCamp
             if (string.IsNullOrWhiteSpace(json))
                 return response.WithStatus(SearchStatus.SearchError);
 
-
             var bcResult = JsonSerializer.Deserialize<BandCampResult>(json);
             response.WithStatus(bcResult.ItemType switch
             {
                 "album" => SearchStatus.PlaylistLoaded,
                 "track" => SearchStatus.TrackLoaded,
-                _       => SearchStatus.NoMatches
+                _ => SearchStatus.NoMatches
             });
 
             if (response.Status == SearchStatus.NoMatches)

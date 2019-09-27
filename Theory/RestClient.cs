@@ -77,24 +77,13 @@ namespace Theory
             if (string.IsNullOrWhiteSpace(url))
                 throw new ArgumentNullException(url);
 
-            using var get = await _client.GetAsync(url)
-                .ConfigureAwait(false);
-
-            if (!get.IsSuccessStatusCode)
-                throw new HttpRequestException(get.ReasonPhrase);
-
-            using var content = get.Content;
-            var stream = await content.ReadAsStreamAsync()
-                .ConfigureAwait(false);
-
-            var ms = new MemoryStream((int) stream.Length);
-            await stream.CopyToAsync(ms)
+            using var stream = await _client.GetStreamAsync(url)
                 .ConfigureAwait(false);
 
             _url = string.Empty;
             _client.DefaultRequestHeaders.Clear();
 
-            return ms;
+            return stream;
         }
 
         public async ValueTask<string> GetStringAsync(string url = default)
@@ -118,6 +107,24 @@ namespace Theory
             _client.DefaultRequestHeaders.Clear();
 
             return str;
+        }
+
+        public async ValueTask<long?> GetContentLengthAsync(string url)
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Head, url);
+
+            using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead)
+                .ConfigureAwait(false);
+
+            var contentLength = response.Content.Headers.ContentLength;
+
+            return contentLength;
+        }
+
+        public async ValueTask<HttpResponseMessage> GetAsync(string url)
+        {
+            return await _client.GetAsync(url)
+                .ConfigureAwait(false);
         }
     }
 }
