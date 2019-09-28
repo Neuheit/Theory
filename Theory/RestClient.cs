@@ -98,7 +98,7 @@ namespace Theory
             if (!get.IsSuccessStatusCode)
                 throw new HttpRequestException(get.ReasonPhrase);
 
-            var stream = await get.Content.ReadAsStreamAsync().ConfigureAwait(false);
+            using var stream = await get.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
             var ms = new MemoryStream();
             await stream.CopyToAsync(ms).ConfigureAwait(false);
