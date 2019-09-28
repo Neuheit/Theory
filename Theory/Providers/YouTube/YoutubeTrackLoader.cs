@@ -75,7 +75,7 @@ namespace Theory.Providers.YouTube
 
             var stream = await _restClient
                  .WithUrl(bestAudioStreamInfo.Url)
-                 .WithRange(bestAudioStreamInfo.IsRateLimited ? 9_898_989 : long.MaxValue)
+                 .WithRange(bestAudioStreamInfo.Length)
                  .GetStreamAsync()
                  .ConfigureAwait(false);
 
