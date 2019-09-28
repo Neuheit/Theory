@@ -67,22 +67,19 @@ namespace Theory.Providers.YouTube
             var audioStreamsInfo = await GetAudioStreamsInfoAsync(trackId).ConfigureAwait(false);
 
             var bestAudioStreamInfo = audioStreamsInfo
-                .Where(a => !a.IsRateLimited)
                 .OrderByDescending(a => a.Bitrate)
                 .FirstOrDefault();
 
-            if (string.IsNullOrWhiteSpace(bestAudioStreamInfo.Url) || bestAudioStreamInfo.IsRateLimited)
-                throw new Exception($"All audios streams for {trackId} is rate-limiteds.");
+            if (string.IsNullOrWhiteSpace(bestAudioStreamInfo.Url))
+                throw new Exception($"Can't get a available audio for this track: {trackId}.");
 
-            var ms = new MemoryStream();
-            using var stream = await _restClient
+            var stream = await _restClient
                  .WithUrl(bestAudioStreamInfo.Url)
+                 .WithRange(bestAudioStreamInfo.IsRateLimited ? 9_898_989 : long.MaxValue)
                  .GetStreamAsync()
                  .ConfigureAwait(false);
 
-            await stream.CopyToAsync(ms).ConfigureAwait(false);
-
-            return ms;
+            return stream;
         }
 
         private static async ValueTask<ICollection<YouTubeAudioStreamInfo>>
@@ -136,7 +133,7 @@ namespace Theory.Providers.YouTube
                         .SubstringAfter("codecs=\"")
                         .SubstringUntil("\""));
 
-                    var rateLimited = RATE_LIMIT_REGEX.IsMatch(url);
+                    var rateLimited = !RATE_LIMIT_REGEX.IsMatch(url);
 
                     audiosInfo.Add(
                         new YouTubeAudioStreamInfo(
@@ -202,7 +199,7 @@ namespace Theory.Providers.YouTube
                         var audioEncodingString = streamInfoXml.Attribute("codecs").Value;
                         var encoding = GetAudioEncoding(audioEncodingString);
 
-                        var rateLimited = RATE_LIMIT_REGEX.IsMatch(url);
+                        var rateLimited = !RATE_LIMIT_REGEX.IsMatch(url);
 
                         audiosInfo.Add(
                             new YouTubeAudioStreamInfo(
