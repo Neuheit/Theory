@@ -105,6 +105,7 @@ namespace Theory
 
             _url = string.Empty;
             _client.DefaultRequestHeaders.Clear();
+            _maxRange = default;
 
             return ms;
         }
