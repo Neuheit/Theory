@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace Theory
@@ -10,6 +11,7 @@ namespace Theory
     {
         private string _url;
         private readonly HttpClient _client;
+        private long? _maxRange;
 
         public RestClient(IWebProxy proxy = default)
         {
@@ -19,6 +21,13 @@ namespace Theory
                 Proxy = proxy,
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             });
+            _maxRange = default;
+        }
+
+        public RestClient WithRange(long maxRange)
+        {
+            _maxRange = maxRange;
+            return this;
         }
 
         public RestClient WithUrl(string url)
@@ -70,20 +79,35 @@ namespace Theory
             return array;
         }
 
-        public async ValueTask<Stream> GetStreamAsync(string url = default)
+        public async ValueTask<Stream> GetStreamAsync(string url = default, long? maxRange = default)
         {
             url ??= _url;
+            maxRange ??= _maxRange;
 
             if (string.IsNullOrWhiteSpace(url))
                 throw new ArgumentNullException(url);
 
-            using var stream = await _client.GetStreamAsync(url)
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+            if (maxRange.HasValue)
+                request.Headers.Range = new RangeHeaderValue(0, maxRange);
+
+            using var get = await _client.SendAsync(request)
                 .ConfigureAwait(false);
+
+            if (!get.IsSuccessStatusCode)
+                throw new HttpRequestException(get.ReasonPhrase);
+
+            using var stream = await get.Content.ReadAsStreamAsync().ConfigureAwait(false);
+
+            var ms = new MemoryStream();
+            await stream.CopyToAsync(ms).ConfigureAwait(false);
 
             _url = string.Empty;
             _client.DefaultRequestHeaders.Clear();
+            _maxRange = default;
 
-            return stream;
+            return ms;
         }
 
         public async ValueTask<string> GetStringAsync(string url = default)
