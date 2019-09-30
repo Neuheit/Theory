@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Theory.Providers.YouTube;
@@ -10,7 +9,7 @@ namespace Theory.Tests
     public sealed class YouTubeTests : IProviderTest
     {
         private readonly RestClient _restClient
-            = new RestClient(default);
+            = new RestClient();
 
         private YouTubeProvider TubeProvider
             => new YouTubeProvider(_restClient);
@@ -41,6 +40,7 @@ namespace Theory.Tests
             Assert.AreEqual(SearchStatus.PlaylistLoaded, response.Status);
             Assert.IsNotNull(response.Playlist);
             Assert.IsNotNull(response.Playlist.Name);
+            Assert.IsNotNull(response.Tracks);
             Assert.IsTrue(response.Tracks.Count > 0);
         }
 
@@ -61,7 +61,10 @@ namespace Theory.Tests
         [DataRow("https://youtu.be/h5zkDVhR2Vk")]
         public async Task GetStreamAsync(string trackUrl)
         {
-            Assert.ThrowsException<NotImplementedException>(() => TubeProvider.GetStreamAsync(trackUrl));
+            var stream = await TubeProvider.GetStreamAsync(trackUrl);
+
+            Assert.IsNotNull(stream);
+            Assert.IsFalse(stream.Length == 0);
         }
     }
 }

@@ -79,9 +79,8 @@ namespace Theory.Providers.SoundCloud
 
                 case SearchStatus.PlaylistLoaded:
                     var scPly = JsonSerializer.Deserialize<SoundCloudPlaylist>(bytes.Span);
-                    response
-                        .WithPlaylist(scPly.AsPlaylistInfo)
-                        .WithTracks(scPly.Tracks.Select(x => x.AsTrackInfo));
+                    response.WithPlaylist(scPly.AsPlaylistInfo);
+                    response.WithTracks(scPly.Tracks.Select(x => x.AsTrackInfo));
 
                     break;
 

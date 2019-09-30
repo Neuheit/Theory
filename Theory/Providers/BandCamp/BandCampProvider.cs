@@ -46,33 +46,40 @@ namespace Theory.Providers.BandCamp
             if (string.IsNullOrWhiteSpace(json))
                 return response.WithStatus(SearchStatus.SearchError);
 
-            var bcResult = JsonSerializer.Deserialize<BandCampResult>(json);
-            response.WithStatus(bcResult.ItemType switch
+            try
             {
-                "album" => SearchStatus.PlaylistLoaded,
-                "track" => SearchStatus.TrackLoaded,
-                _ => SearchStatus.NoMatches
-            });
+                var bcResult = JsonSerializer.Deserialize<BandCampResult>(json);
+                response.WithStatus(bcResult.ItemType switch
+                {
+                    "album" => SearchStatus.PlaylistLoaded,
+                    "track" => SearchStatus.TrackLoaded,
+                    _       => SearchStatus.NoMatches
+                });
 
-            if (response.Status == SearchStatus.NoMatches)
-                return response;
+                if (response.Status == SearchStatus.NoMatches)
+                    return response;
 
-            long duration = 0;
-            foreach (var trackInfo in bcResult.TrackInfo)
-            {
-                var track = trackInfo.AsTrackInfo(bcResult.Artist, bcResult.Url, bcResult.ArtId);
-                response.WithTrack(track);
-                duration += track.Duration;
+                long duration = 0;
+                foreach (var trackInfo in bcResult.TrackInfo)
+                {
+                    var track = trackInfo.AsTrackInfo(bcResult.Artist, bcResult.Url, bcResult.ArtId);
+                    response.WithTrack(track);
+                    duration += track.Duration;
+                }
+
+                var playlistInfo = new PlaylistInfo()
+                    .WithId($"{bcResult.Current.Id}")
+                    .WithName(bcResult.Current.Title)
+                    .WithUrl(bcResult.Url)
+                    .WithDuration(duration)
+                    .WithArtwork(bcResult.ArtId == 0 ? default : $"https://f4.bcbits.com/img/a{bcResult.ArtId}_0.jpg");
+
+                response.WithPlaylist(playlistInfo);
             }
-
-            var playlistInfo = new PlaylistInfo()
-                .WithId($"{bcResult.Current.Id}")
-                .WithName(bcResult.Current.Title)
-                .WithUrl(bcResult.Url)
-                .WithDuration(duration)
-                .WithArtwork(bcResult.ArtId == 0 ? default : $"https://f4.bcbits.com/img/a{bcResult.ArtId}_0.jpg");
-
-            response.WithPlaylist(playlistInfo);
+            catch
+            {
+                response.WithStatus(SearchStatus.SearchError);
+            }
 
             return response;
         }
