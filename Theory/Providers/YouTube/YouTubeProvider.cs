@@ -18,7 +18,7 @@ namespace Theory.Providers.YouTube
         private readonly RestClient _restClient;
 
         public YouTubeProvider(RestClient restClient)
-           => _restClient = restClient;
+            => _restClient = restClient;
 
         /// <inheritdoc />
         public readonly async ValueTask<SearchResponse> SearchAsync(string query)
@@ -97,7 +97,10 @@ namespace Theory.Providers.YouTube
         /// <inheritdoc />
         public readonly async ValueTask<Stream> GetStreamAsync(string trackId)
         {
-            var audioTrackStream = await YouTubeTrackLoader.LoadTrackAsync(trackId).ConfigureAwait(false);
+            YouTubeParser.ParseId(trackId, out var videoId, out _);
+            var audioTrackStream = await YouTubeTrackLoader.LoadTrackAsync(videoId)
+                .ConfigureAwait(false);
+
             return audioTrackStream;
         }
 
