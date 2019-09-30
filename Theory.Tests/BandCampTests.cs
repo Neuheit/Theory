@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Theory.Providers.BandCamp;
@@ -9,7 +10,7 @@ namespace Theory.Tests
     public sealed class BandCampTests : IProviderTest
     {
         private readonly RestClient _restClient
-            = new RestClient(default);
+            = new RestClient();
 
         private BandCampProvider CampProvider
             => new BandCampProvider(_restClient);
@@ -42,6 +43,7 @@ namespace Theory.Tests
             Assert.AreEqual(SearchStatus.PlaylistLoaded, response.Status);
             Assert.IsNotNull(response.Playlist);
             Assert.IsNotNull(response.Playlist.Name);
+            Assert.IsNotNull(response.Tracks);
             Assert.IsTrue(response.Tracks.Count > 0);
         }
 

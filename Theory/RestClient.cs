@@ -7,18 +7,17 @@ using System.Threading.Tasks;
 
 namespace Theory
 {
-    public struct RestClient
+    public sealed class RestClient
     {
         private string _url;
         private readonly HttpClient _client;
         private long? _maxRange;
 
-        public RestClient(IWebProxy proxy = default)
+        public RestClient()
         {
             _url = default;
             _client = new HttpClient(new HttpClientHandler
             {
-                Proxy = proxy,
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             });
             _maxRange = default;
@@ -79,18 +78,17 @@ namespace Theory
             return array;
         }
 
-        public async ValueTask<Stream> GetStreamAsync(string url = default, long? maxRange = default)
+        public async ValueTask<Stream> GetStreamAsync(string url = default)
         {
             url ??= _url;
-            maxRange ??= _maxRange;
 
             if (string.IsNullOrWhiteSpace(url))
                 throw new ArgumentNullException(url);
 
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
 
-            if (maxRange.HasValue)
-                request.Headers.Range = new RangeHeaderValue(0, maxRange);
+            if (_maxRange.HasValue)
+                request.Headers.Range = new RangeHeaderValue(0, _maxRange);
 
             using var get = await _client.SendAsync(request)
                 .ConfigureAwait(false);
@@ -98,14 +96,16 @@ namespace Theory
             if (!get.IsSuccessStatusCode)
                 throw new HttpRequestException(get.ReasonPhrase);
 
-            using var stream = await get.Content.ReadAsStreamAsync().ConfigureAwait(false);
+            await using var stream = await get.Content.ReadAsStreamAsync()
+                .ConfigureAwait(false);
 
             var ms = new MemoryStream();
-            await stream.CopyToAsync(ms).ConfigureAwait(false);
+            await stream.CopyToAsync(ms)
+                .ConfigureAwait(false);
 
             _url = string.Empty;
-            _client.DefaultRequestHeaders.Clear();
             _maxRange = default;
+            _client.DefaultRequestHeaders.Clear();
 
             return ms;
         }
@@ -143,12 +143,6 @@ namespace Theory
             var contentLength = response.Content.Headers.ContentLength;
 
             return contentLength;
-        }
-
-        public async ValueTask<HttpResponseMessage> GetAsync(string url)
-        {
-            return await _client.GetAsync(url)
-                .ConfigureAwait(false);
         }
     }
 }

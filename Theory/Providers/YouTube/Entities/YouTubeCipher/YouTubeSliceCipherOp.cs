@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Theory.Providers.YouTube.Entities.YouTubeCipher
+﻿namespace Theory.Providers.YouTube.Entities.YouTubeCipher
 {
     internal readonly struct YouTubeSliceCipherOp : IYouTubeCipherOp
     {

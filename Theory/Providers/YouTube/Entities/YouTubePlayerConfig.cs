@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Theory.Providers.YouTube.Entities
+﻿namespace Theory.Providers.YouTube.Entities
 {
     internal readonly struct YouTubePlayerConfig
     {

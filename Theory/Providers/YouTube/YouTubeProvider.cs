@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Theory.Infos;
 using Theory.Interfaces;
@@ -20,7 +18,7 @@ namespace Theory.Providers.YouTube
         private readonly RestClient _restClient;
 
         public YouTubeProvider(RestClient restClient)
-           => _restClient = restClient;
+            => _restClient = restClient;
 
         /// <inheritdoc />
         public readonly async ValueTask<SearchResponse> SearchAsync(string query)
@@ -99,7 +97,10 @@ namespace Theory.Providers.YouTube
         /// <inheritdoc />
         public readonly async ValueTask<Stream> GetStreamAsync(string trackId)
         {
-            var audioTrackStream = await YouTubeTrackLoader.LoadTrackAsync(trackId).ConfigureAwait(false);
+            YouTubeParser.ParseId(trackId, out var videoId, out _);
+            var audioTrackStream = await YouTubeTrackLoader.LoadTrackAsync(videoId)
+                .ConfigureAwait(false);
+
             return audioTrackStream;
         }
 
