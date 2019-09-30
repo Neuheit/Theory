@@ -4,20 +4,18 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Theory.Tests
 {
     [TestClass]
-    public class RestClientTests
+    public sealed class RestClientTests
     {
         private readonly RestClient _restClient
-            = new RestClient(default);
+            = new RestClient();
 
-        [TestMethod]
-        public async Task MakeRequestsAsync()
+        [DataTestMethod]
+        [DataRow("https://google.com")]
+        [DataRow("https://discordapp.com/")]
+        [DataRow("https://youtube.com")]
+        public async Task GetStreamAsync(string url)
         {
-        }
-
-        [TestMethod]
-        public async Task GetStreamAsync()
-        {
-            var stream = await _restClient.GetStreamAsync("https://google.com")
+            var stream = await _restClient.GetStreamAsync(url)
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(stream);
@@ -25,20 +23,26 @@ namespace Theory.Tests
             Assert.IsFalse(stream.Length == 0);
         }
 
-        [TestMethod]
-        public async Task GetBytesAsync()
+        [DataTestMethod]
+        [DataRow("https://google.com")]
+        [DataRow("https://discordapp.com/")]
+        [DataRow("https://youtube.com")]
+        public async Task GetBytesAsync(string url)
         {
-            var bytes = await _restClient.GetBytesAsync("https://google.com")
+            var bytes = await _restClient.GetBytesAsync(url)
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(bytes);
             Assert.IsFalse(bytes.IsEmpty);
         }
 
-        [TestMethod]
-        public async Task GetStringAsync()
+        [DataTestMethod]
+        [DataRow("https://google.com")]
+        [DataRow("https://discordapp.com/")]
+        [DataRow("https://youtube.com")]
+        public async Task GetStringAsync(string url)
         {
-            var rawString = await _restClient.GetStringAsync("https://google.com")
+            var rawString = await _restClient.GetStringAsync(url)
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(rawString);

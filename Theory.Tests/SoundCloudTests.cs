@@ -10,7 +10,7 @@ namespace Theory.Tests
     public sealed class SoundCloudTests : IProviderTest
     {
         private readonly RestClient _restClient
-            = new RestClient(default);
+            = new RestClient();
 
         private SoundCloudProvider CloudProvider
             => new SoundCloudProvider(_restClient);
@@ -42,6 +42,7 @@ namespace Theory.Tests
             Assert.AreEqual(SearchStatus.PlaylistLoaded, response.Status);
             Assert.IsNotNull(response.Playlist);
             Assert.IsNotNull(response.Playlist.Name);
+            Assert.IsNotNull(response.Tracks);
             Assert.IsTrue(response.Tracks.Count > 0);
         }
 
