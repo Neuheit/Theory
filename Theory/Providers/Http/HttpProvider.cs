@@ -43,7 +43,8 @@ namespace Theory.Providers.Http
             return stream;
         }
 
+        // I think is better throw a exception here lol.
         public ValueTask<Stream> GetStreamAsync(TrackInfo track)
-            => GetStreamAsync(track.Url);
+            => throw new NotSupportedException();
     }
 }
