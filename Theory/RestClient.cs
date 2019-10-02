@@ -135,14 +135,23 @@ namespace Theory
 
         public async ValueTask<long?> GetContentLengthAsync(string url)
         {
-            using var request = new HttpRequestMessage(HttpMethod.Head, url);
+            url ??= _url;
 
-            using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead)
-                .ConfigureAwait(false);
+            using var response = await HeadAsync(url).ConfigureAwait(false);
 
             var contentLength = response.Content.Headers.ContentLength;
 
             return contentLength;
+        }
+
+        public async ValueTask<HttpResponseMessage> HeadAsync(string url = default)
+        {
+            url ??= _url;
+
+            using var request = new HttpRequestMessage(HttpMethod.Head, url);
+
+            return await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead)
+                .ConfigureAwait(false);
         }
     }
 }

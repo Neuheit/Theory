@@ -27,6 +27,14 @@ namespace Theory.Providers.Http
             if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
                 throw new Exception("url param needs to be a url.");
 
+            using var pageHeaders = await _restClient
+                                        .WithUrl(url)
+                                        .HeadAsync()
+                                        .ConfigureAwait(false);
+
+            if (!pageHeaders.Content.Headers.ContentType.MediaType.Contains("audio"))
+                throw new Exception("url param needs to be a audio url.");
+
             var stream = await _restClient
                             .WithUrl(url)
                             .GetStreamAsync()
