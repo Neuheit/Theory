@@ -21,6 +21,12 @@ namespace Theory.Providers.Http
 
         public async ValueTask<Stream> GetStreamAsync(string url)
         {
+            if (string.IsNullOrWhiteSpace(url))
+                throw new Exception($"url param cannot be null or empty.");
+
+            if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
+                throw new Exception("url param needs to be a url.");
+
             var stream = await _restClient
                             .WithUrl(url)
                             .GetStreamAsync()
