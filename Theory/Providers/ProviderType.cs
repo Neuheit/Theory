@@ -4,6 +4,7 @@ namespace Theory.Providers
     {
         YouTube,
         SoundCloud,
-        BandCamp
+        BandCamp,
+        Http
     }
 }
